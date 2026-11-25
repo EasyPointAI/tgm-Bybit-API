@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TGM Alliance — BYBIT API FAQ & Setup Guide</title>
+  <!-- 引入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入 Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans Thai', '-apple-system', 'BlinkMacSystemFont', 'PingFang SC', 'Microsoft YaHei', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            tgm: {
+              bg: '#080E0C',
+              surface: '#0E1714',
+              card: '#121E1A',
+              border: '#1E332C',
+              emerald: '#10B981',
+              mint: '#34D399',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 深色模式默认背景光晕 */
+    html.dark body {
+      background-color: #080E0C;
+      color: #E2E8F0;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 85% 30%, rgba(6, 78, 59, 0.15) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    /* 浅色模式清爽专业背景 */
+    html:not(.dark) body {
+      background-color: #F8FAFC;
+      color: #0F172A;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 55%);
+      background-attachment: fixed;
+    }
+
+    /* 自定义滚动条 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    html.dark ::-webkit-scrollbar-track { background: #080E0C; }
+    html.dark ::-webkit-scrollbar-thumb { background: #1E332C; border-radius: 9999px; }
+    html:not(.dark) ::-webkit-scrollbar-track { background: #F1F5F9; }
+    html:not(.dark) ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #10B981; }
+
+    /* 手风琴平滑展开动画 */
+    .faq-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .faq-item.open .faq-content {
+      grid-template-rows: 1fr;
+    }
+    .faq-inner {
+      overflow: hidden;
+    }
+    .faq-chevron {
+      transition: transform 0.28s ease;
+    }
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* 隐藏横向滚动条但保持可滑动 */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased transition-colors duration-200 selection:bg-emerald-500/30 selection:text-emerald-600 dark:selection:text-emerald-200">
+
+  <!-- 全局提示 Toast (替代 alert) -->
+  <div id="toast" class="fixed top-20 right-4 sm:right-6 z-50 transform translate-y-[-16px] opacity-0 pointer-events-none transition-all duration-300">
+    <div class="flex items-center gap-2.5 bg-white dark:bg-[#121E1A] border border-emerald-500/50 text-slate-800 dark:text-emerald-100 px-4 py-3 rounded-xl shadow-xl shadow-slate-900/10 dark:shadow-emerald-950/60">
+      <svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>
+      </svg>
+      <span id="toast-message" class="text-sm font-medium">已复制到剪贴板</span>
+    </div>
+  </div>
+
+  <!-- 顶部导航栏 -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/85 dark:bg-[#080E0C]/85 border-b border-slate-200 dark:border-tgm-border/80 transition-colors">
+    <div class="max-w-5xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
+      <!-- 品牌标识 -->
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-700 p-[1px] shadow-md shadow-emerald-500/20 shrink-0">
+          <div class="w-full h-full bg-white dark:bg-[#0B1411] rounded-[11px] flex items-center justify-center transition-colors">
+            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+        </div>
+        <div class="truncate">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-sm sm:text-lg tracking-tight text-slate-900 dark:text-white truncate">TGM Alliance</span>
+            <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
+              tgmweb3.vip
+            </span>
+          </div>
+          <p id="ui-brand-sub" class="text-[11px] text-slate-500 dark:text-slate-400 leading-none mt-0.5 truncate">BYBIT API 跟单帮助中心</p>
+        </div>
+      </div>
+
+      <!-- 右侧工具栏：5语言切换 + 双色主题切换 + 展开全部 -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        
+        <!-- 5语言下拉菜单 -->
+        <div class="relative" id="lang-dropdown-wrapper">
+          <button 
+            onclick="toggleLangMenu()" 
+            type="button"
+            class="h-9 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-tgm-card dark:hover:bg-tgm-border/70 border border-slate-200 dark:border-tgm-border text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium flex items-center gap-1.5 transition"
+            aria-label="Select Language"
+          >
+            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>
+            </svg>
+            <span id="current-lang-label" class="font-mono font-semibold">ZH</span>
+            <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+
+          <!-- 语言列表浮层 -->
+          <div id="lang-menu" class="hidden absolute right-0 mt-2 w-44 rounded-2xl bg-white dark:bg-[#121E1A] border border-slate-200 dark:border-tgm-border shadow-xl py-1.5 z-50">
+            <button onclick="setLanguage('zh')" class="lang-option w-full px-3.5 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-slate-100 dark:hover:bg-tgm-border/60 text-slate-700 dark:text-slate-200" data-lang="zh">
+              <span>简体中文</span>
+              <span class="font-mono text-[11px] text-emerald-600 dark:text-emerald-400">ZH</span>
+            </button>
+            <button onclick="setLanguage('en')" class="lang-option w-full px-3.5 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-slate-100 dark:hover:bg-tgm-border/60 text-slate-700 dark:text-slate-200" data-lang="en">
+              <span>English</span>
+              <span class="font-mono text-[11px] text-slate-400">EN</span>
+            </button>
+            <button onclick="setLanguage('id')" class="lang-option w-full px-3.5 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-slate-100 dark:hover:bg-tgm-border/60 text-slate-700 dark:text-slate-200" data-lang="id">
+              <span>Bahasa Indonesia</span>
+              <span class="font-mono text-[11px] text-slate-400">ID</span>
+            </button>
+            <button onclick="setLanguage('th')" class="lang-option w-full px-3.5 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-slate-100 dark:hover:bg-tgm-border/60 text-slate-700 dark:text-slate-200" data-lang="th">
+              <span>ภาษาไทย</span>
+              <span class="font-mono text-[11px] text-slate-400">TH</span>
+            </button>
+            <button onclick="setLanguage('vi')" class="lang-option w-full px-3.5 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-slate-100 dark:hover:bg-tgm-border/60 text-slate-700 dark:text-slate-200" data-lang="vi">
+              <span>Tiếng Việt</span>
+              <span class="font-mono text-[11px] text-slate-400">VI</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 深色 / 浅色 双色主题切换按钮 -->
+        <button 
+          onclick="toggleTheme()" 
+          type="button"
+          class="h-9 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-tgm-card dark:hover:bg-tgm-border/70 border border-slate-200 dark:border-tgm-border text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition"
+          title="切换深色 / 浅色背景"
+        >
+          <svg class="w-4 h-4 text-amber-500 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+          </svg>
+          <svg class="w-4 h-4 text-emerald-600 block dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <span id="ui-theme-label" class="hidden sm:inline">浅色</span>
+        </button>
+
+        <!-- 全部展开/收起按钮 -->
+        <button 
+          onclick="toggleAllFaq()" 
+          id="toggle-all-btn" 
+          type="button"
+          class="h-9 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-tgm-card dark:hover:bg-tgm-border/70 border border-slate-200 dark:border-tgm-border text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition"
+        >
+          <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>
+          </svg>
+          <span id="ui-toggle-all" class="hidden md:inline">展开全部</span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体内容区 -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-7 sm:py-11">
+
+    <!-- Hero 标题与实时搜索区 -->
+    <section class="text-center max-w-2xl mx-auto mb-9">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 text-xs font-medium mb-4">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+        <span id="ui-hero-badge">BYBIT 统一交易账户 · 自动化 API 跟单指引</span>
+      </div>
+      <h1 id="ui-hero-title" class="text-2xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-3 leading-snug">
+        Bybit API 创建与绑定完整教程
+      </h1>
+      <p id="ui-hero-desc" class="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+        从升级 Bybit 统一交易账户（UTA）、生成系统 HMAC 密钥、配置 IP 白名单到完成 TGM Alliance 平台绑定与关联信号源，手把手带您安全完成每一步。
+      </p>
+
+      <!-- 搜索框 -->
+      <div class="relative max-w-xl mx-auto">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <svg class="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="search-input" 
+          oninput="filterFaq()"
+          placeholder="搜索问题关键词，例如：统一交易账户、白名单、Secret Key、关联信号源、报错..." 
+          class="w-full pl-11 pr-10 py-3.5 bg-white dark:bg-tgm-surface border border-slate-300 dark:border-tgm-border focus:border-emerald-500 rounded-2xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition shadow-sm"
+        />
+        <button 
+          id="clear-search" 
+          onclick="clearSearch()" 
+          type="button"
+          class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-white"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- 核心配置参数速查看板 -->
+    <section class="mb-9 bg-white dark:bg-gradient-to-b dark:from-tgm-card dark:to-tgm-surface border border-slate-200 dark:border-tgm-border rounded-2xl p-5 sm:p-6 shadow-md dark:shadow-xl transition-colors">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-200 dark:border-tgm-border/80">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/>
+            </svg>
+          </div>
+          <div>
+            <h2 id="ui-panel-title" class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Bybit 绑定参数速查看板（核对清单）</h2>
+            <p id="ui-panel-sub" class="text-xs text-slate-500 dark:text-slate-400">在 Bybit 后台与 TGM Alliance 填写时，请严格保持以下参数一致</p>
+          </div>
+        </div>
+        <span id="ui-panel-badge" class="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-500/30 px-2.5 py-1 rounded-lg self-start sm:self-auto">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>
+          </svg>
+          <span>官方标准配置</span>
+        </span>
+      </div>
+
+      <!-- 4项基础配置网格 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div class="bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/70 rounded-xl p-3.5">
+          <span id="ui-lbl-env" class="text-xs text-slate-500 dark:text-slate-400 block mb-1">API 密钥类型</span>
+          <span id="ui-val-env" class="text-sm font-semibold text-slate-900 dark:text-white font-mono">系统生成 (System-generated)</span>
+        </div>
+        <div class="bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/70 rounded-xl p-3.5">
+          <span id="ui-lbl-keytype" class="text-xs text-slate-500 dark:text-slate-400 block mb-1">API 用途选择</span>
+          <span id="ui-val-keytype" class="text-sm font-semibold text-slate-900 dark:text-white font-mono">API 交易 (API Transaction)</span>
+        </div>
+        <div class="bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/70 rounded-xl p-3.5">
+          <span id="ui-lbl-market" class="text-xs text-slate-500 dark:text-slate-400 block mb-1">API 权限模式</span>
+          <span id="ui-val-market" class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 font-mono">读写 (Read-Write)</span>
+        </div>
+        <div class="bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/70 rounded-xl p-3.5">
+          <span id="ui-lbl-role" class="text-xs text-slate-500 dark:text-slate-400 block mb-1">账户架构</span>
+          <span id="ui-val-role" class="text-sm font-semibold text-slate-900 dark:text-white font-mono">统一交易账户 (UTA)</span>
+        </div>
+      </div>
+
+      <!-- IP 白名单独立高亮栏（带一键复制） -->
+      <div class="bg-emerald-50/70 dark:bg-[#0A110E] border border-emerald-500/35 rounded-xl p-3.5 sm:p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="ui-lbl-ip" class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">IP 访问限制白名单 (IP Whitelist)</span>
+            <span id="ui-ip-req" class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-medium">必须开启</span>
+          </div>
+          <p class="font-mono text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-1 tracking-wide select-all">88.216.191.238</p>
+        </div>
+        <button 
+          onclick="copyIpAddress()" 
+          id="copy-ip-btn"
+          type="button"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-sm transition shrink-0"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+          </svg>
+          <span id="ui-copy-ip-text">一键复制 IP</span>
+        </button>
+      </div>
+
+      <!-- Bybit 权限矩阵 (4项必勾 + 1项严禁) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        <div class="bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/70 rounded-xl p-3 flex flex-col justify-between">
+          <span id="ui-perm-contract" class="text-[11px] text-slate-600 dark:text-slate-400 font-medium">合约 (Orders / Positions)</span>
+          <span class="ui-must-check text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1.5 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>必须勾选</span>
+          </span>
+        </div>
+        <div class="bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/70 rounded-xl p-3 flex flex-col justify-between">
+          <span id="ui-perm-options" class="text-[11px] text-slate-600 dark:text-slate-400 font-medium">USDC 衍生品 / 期权</span>
+          <span class="ui-must-check text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1.5 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>必须勾选</span>
+          </span>
+        </div>
+        <div class="bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/70 rounded-xl p-3 flex flex-col justify-between">
+          <span id="ui-perm-spot" class="text-[11px] text-slate-600 dark:text-slate-400 font-medium">现货交易 (Spot Trade)</span>
+          <span class="ui-must-check text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1.5 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>按需勾选</span>
+          </span>
+        </div>
+        <div class="bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/70 rounded-xl p-3 flex flex-col justify-between">
+          <span id="ui-perm-transfer" class="text-[11px] text-slate-600 dark:text-slate-400 font-medium">账户划转 (Account Transfer)</span>
+          <span class="ui-must-check text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1.5 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>必须勾选</span>
+          </span>
+        </div>
+        <div class="bg-amber-50/80 dark:bg-[#0A110E] border border-amber-500/40 rounded-xl p-3 flex flex-col justify-between">
+          <span id="ui-perm-withdraw" class="text-[11px] text-amber-800 dark:text-slate-400 font-medium">提现权限 (Withdraw)</span>
+          <span id="ui-forbid-check" class="text-xs font-bold text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+            <span>严禁勾选</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 分类筛选标签 Tabs -->
+    <section class="mb-6">
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2" id="category-tabs">
+        <button data-category="all" onclick="setCategory('all')" id="tab-all" class="tab-btn active shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-emerald-600 dark:bg-emerald-500 text-white dark:text-[#051B14] shadow-sm">
+          全部问题 (8)
+        </button>
+        <button data-category="start" onclick="setCategory('start')" id="tab-start" class="tab-btn shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-white dark:bg-tgm-card text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-tgm-border hover:border-emerald-500/50">
+          新手入门
+        </button>
+        <button data-category="perm" onclick="setCategory('perm')" id="tab-perm" class="tab-btn shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-white dark:bg-tgm-card text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-tgm-border hover:border-emerald-500/50">
+          权限与白名单
+        </button>
+        <button data-category="error" onclick="setCategory('error')" id="tab-error" class="tab-btn shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-white dark:bg-tgm-card text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-tgm-border hover:border-emerald-500/50">
+          报错排查
+        </button>
+        <button data-category="security" onclick="setCategory('security')" id="tab-security" class="tab-btn shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-white dark:bg-tgm-card text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-tgm-border hover:border-emerald-500/50">
+          风控安全
+        </button>
+      </div>
+    </section>
+
+    <!-- 动态渲染的 FAQ 手风琴列表 -->
+    <section id="faq-list" class="space-y-3.5"></section>
+
+    <!-- 搜索无结果提示 -->
+    <div id="no-results" class="hidden text-center py-12 bg-white dark:bg-tgm-card border border-slate-200 dark:border-tgm-border rounded-2xl">
+      <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-tgm-surface border border-slate-200 dark:border-tgm-border flex items-center justify-center mx-auto mb-3 text-slate-400">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="m8 8 6 6"/><path d="m14 8-6 6"/>
+        </svg>
+      </div>
+      <h3 id="ui-nores-title" class="text-base font-semibold text-slate-900 dark:text-white mb-1">未找到匹配的常见问题</h3>
+      <p id="ui-nores-desc" class="text-xs text-slate-500 dark:text-slate-400 mb-4">请尝试更换其他关键词或重置筛选条件</p>
+      <button onclick="clearSearch()" id="ui-nores-btn" type="button" class="px-4 py-2 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-medium hover:bg-emerald-500/25 transition">
+        重置搜索条件
+      </button>
+    </div>
+
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="border-t border-slate-200 dark:border-tgm-border/80 bg-white dark:bg-[#060B09] py-8 mt-12 transition-colors">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div>
+        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+          <span class="font-semibold text-sm text-slate-900 dark:text-white">Powered by TGM Alliance · tgmweb3.vip</span>
+        </div>
+        <p id="ui-footer-risk" class="text-xs text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+          风险提示：数字资产与衍生品交易具有较高的市场波动性，请充分评估自身风险承受能力，合理配置资金并做好子账户隔离。
+        </p>
+      </div>
+      <div class="shrink-0">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-tgm-card dark:hover:bg-tgm-border/70 border border-slate-200 dark:border-tgm-border text-xs text-slate-700 dark:text-slate-300 transition">
+          <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 15-6-6-6 6"/>
+          </svg>
+          <span id="ui-back-top">返回顶部</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 多语言字典与交互逻辑 -->
+  <script>
+    // ==========================================
+    // 1. 完整 5 种语言翻译字典 (ZH / EN / ID / TH / VI)
+    // ==========================================
+    const I18N = {
+      zh: {
+        code: 'ZH',
+        brandSub: 'BYBIT API 跟单帮助中心',
+        themeToLight: '浅色',
+        themeToDark: '深色',
+        expandAll: '展开全部',
+        collapseAll: '收起全部',
+        heroBadge: 'BYBIT 统一交易账户 · 自动化 API 跟单指引',
+        heroTitle: 'Bybit API 创建与绑定完整教程',
+        heroDesc: '支持 Bybit BTC 与 ETH 期权及合约跟单！从升级统一交易账户（UTA）、生成系统 HMAC 密钥、配置 IP 白名单到完成 TGM Alliance 平台绑定与关联信号源，手把手带您安全完成每一步。',
+        searchPlaceholder: '搜索问题关键词，例如：BTC期权、ETH期权、USDC、统一交易账户、白名单、币安区别...',
+        panelTitle: 'Bybit 绑定参数速查看板（核对清单）',
+        panelSub: '在 Bybit 后台与 TGM Alliance 填写时，请严格保持以下参数一致',
+        panelBadge: '官方标准配置',
+        lblEnv: 'API 密钥类型',
+        valEnv: '系统生成 (System-generated)',
+        lblKeyType: 'API 用途选择',
+        valKeyType: 'API 交易 (API Transaction)',
+        lblMarket: 'API 权限模式',
+        valMarket: '读写 (Read-Write)',
+        lblRole: '账户架构',
+        valRole: '统一交易账户 (UTA)',
+        lblIp: 'IP 访问限制白名单 (IP Whitelist)',
+        ipReq: '必须开启',
+        copyIp: '一键复制 IP',
+        copiedIp: '已复制 IP',
+        toastCopied: 'IP 白名单 (88.216.191.238) 已复制到剪贴板！',
+        permContract: '合约 (Orders / Positions)',
+        permOptions: 'USDC 衍生品 / 期权 (BTC/ETH)',
+        permSpot: '现货交易 (Spot Trade)',
+        permTransfer: '账户划转 (Account Transfer)',
+        permWithdraw: '提现权限 (Withdraw)',
+        mustCheck: '必须勾选',
+        forbidCheck: '严禁勾选',
+        tabAll: '全部问题 (9)',
+        tabStart: '新手入门',
+        tabPerm: '权限与白名单',
+        tabError: '报错排查',
+        tabSecurity: '风控安全',
+        noResTitle: '未找到匹配的常见问题',
+        noResDesc: '请尝试更换其他关键词或重置筛选条件',
+        noResBtn: '重置搜索条件',
+        footerRisk: '风险提示：数字资产与期权衍生品交易具有较高的市场波动性，请充分评估自身风险承受能力，合理配置资金并做好子账户隔离。',
+        backTop: '返回顶部',
+        faqs: [
+          {
+            cat: 'start',
+            tag: '新手入门',
+            tagColor: 'emerald',
+            q: 'Q1. 绑定前在 Bybit 需要做哪些准备工作？（升级 UTA 与 BTC/ETH 期权保证金）',
+            a: `<p>Bybit 采用<strong>统一交易账户（Unified Trading Account, UTA）</strong>架构，且 Bybit 上的 <strong>BTC 与 ETH 期权默认以 USDC 结算</strong>。在创建 API 前请先完成以下确认：</p>
+                <ol class="list-decimal list-inside space-y-2 mt-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li>登录 Bybit 官网或手机 App，确保已完成基础 <strong>KYC 身份认证</strong>（未完成认证无法创建 API）。</li>
+                  <li>进入 <strong class="text-emerald-600 dark:text-emerald-400">【资产】→【统一交易账户】</strong>，若尚未升级请按提示一键免费升级为 UTA 账户。</li>
+                  <li>将计划用于跟单的 <strong>USDT 或 USDC</strong> 从【资金账户】划转至【统一交易账户】（UTA 支持多币种共享保证金，存入 USDT 即可自动折算保证金用于交易 BTC / ETH 期权）。</li>
+                  <li>首次交易期权前，建议在网页端进入 <strong class="text-emerald-600 dark:text-emerald-400">【衍生品】→【期权 (Options)】</strong> 完成简短的期权风险测评答题以激活期权交易权限。</li>
+                </ol>`
+          },
+          {
+            cat: 'perm',
+            tag: '核心步骤',
+            tagColor: 'emerald',
+            q: 'Q2. 如何在 Bybit 创建 API 密钥并正确勾选 BTC/ETH 期权权限与 IP 白名单？（完整 4 步）',
+            a: `<p>请在电脑网页端登录 Bybit（操作更直观），严格按以下 4 步配置：</p>
+                <div class="space-y-3 mt-2.5 p-4 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p><strong>第一步：进入 API 管理页面</strong><br/>点击右上角个人头像 → 选择<strong>【API】</strong> → 点击右上角橙色按钮<strong>【创建新密钥 (Create New Key)】</strong>。</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>第二步：选择密钥类型与填写 IP 白名单（关键！）</strong><br/>
+                    • <strong>密钥类型：</strong>选择<strong>【系统生成的 API 密钥 (System-generated API Keys)】</strong>。<br/>
+                    • <strong>API 密钥用途：</strong>选择<strong>【API 交易 (API Transaction)】</strong>，输入名称备注（如 <code class="font-mono text-xs">TGM_Bybit_Options</code>）。<br/>
+                    • <strong>API 密钥权限：</strong>选择<strong>【读写 (Read-Write)】</strong>。<br/>
+                    • <strong>IP 访问限制：</strong>选择<strong>【只允许具有特定 IP 的访问】</strong>，填入专属白名单 IP：<code class="font-mono font-bold text-emerald-600 dark:text-emerald-400">88.216.191.238</code>（在 Bybit 中绑定白名单 IP 后，该 API 密钥将永久有效、不会 90 天过期）。
+                  </p>
+                  <div class="pt-2 border-t border-slate-200 dark:border-tgm-border/40">
+                    <p class="mb-2"><strong>第三步：严格勾选以下交易权限（含 BTC/ETH 期权）并保持提现关闭</strong></p>
+                    <ul class="space-y-1.5 text-xs sm:text-sm">
+                      <li>✅ <strong>统一交易账户 (Unified Trading)</strong>：勾选 <strong>合约 (Orders / Positions)</strong> 与 <strong>USDC 衍生品 / 期权交易 (USDC Derivatives / Options — 含 BTC & ETH 期权)</strong></li>
+                      <li>✅ <strong>现货 (Spot)</strong>：勾选 <strong>现货交易 (Trade)</strong></li>
+                      <li>✅ <strong>资产 (Assets)</strong>：勾选 <strong>账户划转 (Account Transfer)</strong>（用于系统内部保证金自动调拨）</li>
+                      <li class="text-amber-600 dark:text-amber-400 font-semibold">❌ <strong>提现 (Withdraw)</strong>：严禁勾选（保持不勾选状态，保障资金绝对安全）</li>
+                    </ul>
+                  </div>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>第四步：提交验证并立刻保存双密钥</strong><br/>点击<strong>【提交 (Submit)】</strong>完成邮箱及谷歌验证码（2FA）验证。弹窗出现后，<strong>立刻复制并保存 API Key 与 API Secret</strong>（关闭弹窗后 Secret 将永久隐藏）。</p>
+                </div>`
+          },
+          {
+            cat: 'start',
+            tag: '平台绑定',
+            tagColor: 'emerald',
+            q: 'Q3. 如何将获取的 Bybit API 绑定到 TGM Alliance (tgmweb3.vip) 并关联信号源？',
+            a: `<p>在 Bybit 完成创建后，建议等待 <strong>15～30 秒</strong>让节点同步，随后进入 <strong>TGM Alliance (tgmweb3.vip)</strong> 的 API 绑定页面：</p>
+                <ul class="list-disc list-inside space-y-1.5 mt-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li><strong>交易所选择：</strong>选择 <code class="font-mono text-emerald-600 dark:text-emerald-400">BYBIT</code>，运行环境保持 <code class="font-mono text-emerald-600 dark:text-emerald-400">正式环境 LIVE</code></li>
+                  <li><strong>密钥类型：</strong>保持默认 <code class="font-mono text-emerald-600 dark:text-emerald-400">系统生成 HMAC</code></li>
+                  <li><strong>API Key / Secret Key：</strong>分别粘贴从 Bybit 复制的完整密钥（注意前后不要带空格）</li>
+                  <li><strong>账户角色：</strong>保持默认 <code class="font-mono text-emerald-600 dark:text-emerald-400">API 跟单 FOLLOWER</code></li>
+                  <li><strong>IP 白名单：</strong>确认显示为 <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code></li>
+                  <li><strong>验证提交：</strong>勾选底部的立即验证选项，点击确认按钮完成初步连接。</li>
+                </ul>
+                <div class="mt-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/35 space-y-2">
+                  <p class="font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                    <span>⚠️ 关键最后一步：关联策略信号源（未完成此步将不会自动跟单！）</span>
+                  </p>
+                  <ol class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                    <li>验证提交成功后，在 TGM 页面的 <strong>【API权限状态】</strong> 栏位点击 <strong>【查看】</strong> 按钮进入详情页。</li>
+                    <li>向下滑动页面至 <strong>【跟单设置（关联信号源）】</strong> 区域。</li>
+                    <li>在关联信号下拉列表中，选择您要跟随的对应策略信号源（例如 <code class="font-mono font-bold text-emerald-700 dark:text-emerald-400">TGM期权策略信号1. SP-AEC50B82</code> 或对应 Bybit 策略信号）。</li>
+                    <li>在跟单方式中，强烈建议选择 <strong class="text-emerald-700 dark:text-emerald-400">【自动缩放】</strong>（可按您的账户本金比例自动匹配仓位，风控更安全）。</li>
+                    <li>点击 <strong>【保存关联】</strong> 即可正式完成全部绑定设置！随后您可在平台的 <strong>【总览】</strong> 页面实时查看与 Bybit 账户同步的资产与持仓动态。</li>
+                  </ol>
+                </div>`
+          },
+          {
+            cat: 'perm',
+            tag: '有效期说明',
+            tagColor: 'cyan',
+            q: 'Q4. 为什么 Bybit 创建 API 时强烈要求绑定白名单 IP？不绑定会有什么影响？',
+            a: `<div class="space-y-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p><strong>1. 防止 90 天自动过期中断跟单：</strong>根据 Bybit 安全规则，<strong>未绑定 IP 白名单的读写权限 API 密钥将在 90 天后自动过期失效</strong>，这会导致您的跟单突然中断甚至无法自动平仓；而绑定了固定白名单 IP（<code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code>）的 API 密钥则是<strong>永久有效</strong>的。</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>2. 最高级别防盗防护：</strong>绑定 IP 后，即便密钥意外泄露，任何其他陌生 IP 也无法调用您的 API 下单。</p>
+                </div>`
+          },
+          {
+            cat: 'error',
+            tag: '报错排查',
+            tagColor: 'amber',
+            q: 'Q5. 绑定时提示“API Key 无效 / IP 不匹配 / 权限不足”怎么排查？',
+            a: `<p>请按以下 4 点逐一核对：</p>
+                <ul class="list-disc list-inside space-y-1.5 mt-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li><strong>误选了“只读 (Read-Only)”：</strong>创建 API 时必须选择<strong>【读写 (Read-Write)】</strong>，只读模式无法下单，且创建后不能直接修改为读写，需重新创建。</li>
+                  <li><strong>IP 填写有误：</strong>检查 Bybit 后台白名单框内是否准确填写了 <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code>，前后不能有多余空格。</li>
+                  <li><strong>未升级统一交易账户（UTA）：</strong>部分旧版 Bybit 账户未升级至 UTA，会导致新版 v5 接口权限校验失败，请前往资产页一键升级 UTA。</li>
+                  <li><strong>密钥首尾带入空格：</strong>检查粘贴到 TGM 平台的 API Key 和 Secret Key 是否完整无空格。</li>
+                </ul>`
+          },
+          {
+            cat: 'error',
+            tag: '报错排查',
+            tagColor: 'amber',
+            q: 'Q6. 忘记保存 Bybit 的 API Secret（私钥）怎么办？',
+            a: `<p>Bybit 出于加密安全考虑，<strong>API Secret 仅在创建完成弹出的那一刻显示一次</strong>，关闭窗口后在后台列表将无法再次查看明文。</p>
+                <p class="mt-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">如果您未及时保存，只需在 Bybit 的【API 管理】列表中点击该密钥右侧的<strong>【删除 (Delete)】</strong>，然后重新点击【创建新密钥】生成一套新的 API Key 与 Secret 并立即保存即可。</p>`
+          },
+          {
+            cat: 'security',
+            tag: '风控安全',
+            tagColor: 'cyan',
+            q: 'Q7. 如何使用 Bybit“子账户（Subaccount）”进行跟单资金物理隔离？',
+            a: `<div class="space-y-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p>Bybit 原生支持非常完善的<strong>子账户（Subaccount）</strong>功能，强烈建议您使用子账户绑定跟单，实现与主账户大额资产的 100% 物理隔离：</p>
+                  <ol class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm">
+                    <li>在 Bybit 右上角头像 → 点击<strong>【子账户 (Subaccount)】</strong> → 创建一个新的<strong>标准子账户</strong>（无需额外 KYC）。</li>
+                    <li>通过母子账户划转，仅将计划用于跟单的 <strong>USDT</strong> 划入该子账户的统一交易账户中。</li>
+                    <li>在右上角<strong>切换登录至该子账户</strong>，进入子账户的【API 管理】创建专属 API 密钥并绑定到 TGM Alliance 即可。</li>
+                  </ol>
+                </div>`
+          },
+          {
+            cat: 'security',
+            tag: '合规说明',
+            tagColor: 'cyan',
+            q: 'Q8. 所在国家/地区受 Bybit 合规限制无法交易衍生品怎么办？',
+            a: `<p>受当地金融监管法规限制，部分国家或地区（如美国、新加坡、中国大陆等受限司法管辖区）的 KYC 认证账号在 Bybit 无法使用合约或期权衍生品交易功能。若您的账号在 Bybit 受到衍生品区域限制，将无法通过 API 执行相关衍生品跟单指令。</p>`
+          }
+        ]
+      },
+
+      // ==================== ENGLISH (EN) ====================
+      en: {
+        code: 'EN',
+        brandSub: 'BYBIT API COPY TRADING HELP CENTER',
+        themeToLight: 'Light',
+        themeToDark: 'Dark',
+        expandAll: 'Expand All',
+        collapseAll: 'Collapse All',
+        heroBadge: 'BYBIT Unified Trading Account · Automated API Copy Trading',
+        heroTitle: 'Bybit API Setup & Binding Complete Guide',
+        heroDesc: 'Step-by-step instructions from upgrading to Bybit Unified Trading Account (UTA), generating HMAC API keys, and configuring IP whitelists to linking your signal provider on TGM Alliance.',
+        searchPlaceholder: 'Search keywords: Unified Trading Account, whitelist, Secret Key, link signal...',
+        panelTitle: 'Bybit Parameter Checklist',
+        panelSub: 'Ensure all parameters below match strictly on both Bybit and TGM Alliance',
+        panelBadge: 'Official Standard',
+        lblEnv: 'API Key Type',
+        valEnv: 'System-generated',
+        lblKeyType: 'API Key Usage',
+        valKeyType: 'API Transaction',
+        lblMarket: 'Permission Mode',
+        valMarket: 'Read-Write',
+        lblRole: 'Account Mode',
+        valRole: 'Unified Trading (UTA)',
+        lblIp: 'IP Access Restriction Whitelist',
+        ipReq: 'Required',
+        copyIp: 'Copy IP',
+        copiedIp: 'Copied',
+        toastCopied: 'IP Whitelist (88.216.191.238) copied to clipboard!',
+        permContract: 'Contract (Orders / Positions)',
+        permOptions: 'USDC Derivatives / Options',
+        permSpot: 'Spot Trade',
+        permTransfer: 'Account Transfer',
+        permWithdraw: 'Withdraw Permission',
+        mustCheck: 'Must Enable',
+        forbidCheck: 'Never Enable',
+        tabAll: 'All FAQs (8)',
+        tabStart: 'Getting Started',
+        tabPerm: 'Permissions & IP',
+        tabError: 'Troubleshooting',
+        tabSecurity: 'Risk & Security',
+        noResTitle: 'No matching questions found',
+        noResDesc: 'Try different keywords or reset your search filters',
+        noResBtn: 'Reset Search',
+        footerRisk: 'Risk Warning: Digital asset and derivatives trading involves high market volatility. Please assess your risk tolerance carefully and isolate funds using a sub-account.',
+        backTop: 'Back to Top',
+        faqs: [
+          {
+            cat: 'start',
+            tag: 'Getting Started',
+            tagColor: 'emerald',
+            q: 'Q1. What preparations are needed on Bybit before binding? (UTA Upgrade & Transfer)',
+            a: `<p>Bybit operates on the <strong>Unified Trading Account (UTA)</strong> architecture. Before creating an API key, complete these checks:</p>
+                <ol class="list-decimal list-inside space-y-2 mt-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li>Log in to Bybit Web or App and ensure basic <strong>KYC Identity Verification</strong> is completed.</li>
+                  <li>Go to <strong class="text-emerald-600 dark:text-emerald-400">[Assets] → [Unified Trading]</strong> and upgrade to UTA if you haven't already.</li>
+                  <li>Transfer your intended <strong>USDT / USDC</strong> trading capital from [Funding] to [Unified Trading Account].</li>
+                  <li>If trading Options, visit [Derivatives] → [Options] once to pass the brief risk assessment quiz.</li>
+                </ol>`
+          },
+          {
+            cat: 'perm',
+            tag: 'Core Steps',
+            tagColor: 'emerald',
+            q: 'Q2. How to create a Bybit API key with required permissions & IP whitelist? (4 Steps)',
+            a: `<p>Log in to Bybit on a desktop browser and follow these 4 exact steps:</p>
+                <div class="space-y-3 mt-2.5 p-4 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p><strong>Step 1: Open API Management</strong><br/>Click your profile icon at the top right → select <strong>[API]</strong> → click <strong>[Create New Key]</strong>.</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>Step 2: Select Key Type & Enter IP Whitelist (Crucial!)</strong><br/>
+                    • <strong>Key Type:</strong> Select <strong>[System-generated API Keys]</strong>.<br/>
+                    • <strong>API Key Usage:</strong> Select <strong>[API Transaction]</strong> and enter a name (e.g., <code class="font-mono text-xs">TGM_Bybit_Copy</code>).<br/>
+                    • <strong>API Key Permissions:</strong> Select <strong>[Read-Write]</strong>.<br/>
+                    • <strong>IP Restriction:</strong> Select <strong>[Only IPs with permissions granted are allowed to access the OpenAPI]</strong> and enter: <code class="font-mono font-bold text-emerald-600 dark:text-emerald-400">88.216.191.238</code> (binding an IP prevents the 90-day expiration rule).
+                  </p>
+                  <div class="pt-2 border-t border-slate-200 dark:border-tgm-border/40">
+                    <p class="mb-2"><strong>Step 3: Check Required Trading Permissions & Keep Withdrawals Off</strong></p>
+                    <ul class="space-y-1.5 text-xs sm:text-sm">
+                      <li>✅ <strong>Unified Trading</strong>: Check <strong>Contract (Orders / Positions)</strong> & <strong>USDC Derivatives / Options</strong></li>
+                      <li>✅ <strong>Spot</strong>: Check <strong>Spot Trade</strong></li>
+                      <li>✅ <strong>Assets</strong>: Check <strong>Account Transfer</strong></li>
+                      <li class="text-amber-600 dark:text-amber-400 font-semibold">❌ <strong>Withdraw</strong>: NEVER check (keep disabled for maximum security)</li>
+                    </ul>
+                  </div>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>Step 4: Submit 2FA & Save Both Keys Immediately</strong><br/>Click <strong>[Submit]</strong> and complete Email + Google 2FA verification. <strong>Copy and save both your API Key and API Secret immediately</strong> before closing the popup.</p>
+                </div>`
+          },
+          {
+            cat: 'start',
+            tag: 'Platform Binding',
+            tagColor: 'emerald',
+            q: 'Q3. How to bind the Bybit API key to TGM Alliance (tgmweb3.vip) and link the signal source?',
+            a: `<p>Wait <strong>15–30 seconds</strong> after saving on Bybit, then open the API Binding page on <strong>TGM Alliance (tgmweb3.vip)</strong>:</p>
+                <ul class="list-disc list-inside space-y-1.5 mt-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li><strong>Exchange & Environment:</strong> Select <code class="font-mono text-emerald-600 dark:text-emerald-400">BYBIT</code> and keep <code class="font-mono text-emerald-600 dark:text-emerald-400">LIVE</code></li>
+                  <li><strong>Key Type:</strong> Keep default <code class="font-mono text-emerald-600 dark:text-emerald-400">System-generated HMAC</code></li>
+                  <li><strong>API Key / Secret Key:</strong> Paste your complete keys without leading or trailing spaces</li>
+                  <li><strong>Account Role:</strong> Keep default <code class="font-mono text-emerald-600 dark:text-emerald-400">API FOLLOWER</code></li>
+                  <li><strong>IP Whitelist:</strong> Confirm it shows <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code></li>
+                  <li><strong>Submit & Verify:</strong> Check the immediate verification box at the bottom and click Confirm.</li>
+                </ul>
+                <div class="mt-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/35 space-y-2">
+                  <p class="font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                    <span>⚠️ Crucial Final Step: Link Signal Provider (Required to Activate Copy Trading!)</span>
+                  </p>
+                  <ol class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                    <li>After verification succeeds, click <strong>[View]</strong> under <strong>[API Permission Status]</strong> on TGM to open the details page.</li>
+                    <li>Scroll down to the <strong>[Copy Trading Settings (Link Signal Source)]</strong> section.</li>
+                    <li>Select your target strategy signal source from the dropdown list (e.g., <code class="font-mono font-bold text-emerald-700 dark:text-emerald-400">TGM期权策略信号1. SP-AEC50B82</code> or the corresponding Bybit strategy signal).</li>
+                    <li>For the copy mode, we strongly recommend selecting <strong class="text-emerald-700 dark:text-emerald-400">[Auto-Scaling]</strong> for safer capital-proportional position sizing.</li>
+                    <li>Click <strong>[Save Link]</strong> to complete setup! You can then monitor your synced Bybit positions and balance on the <strong>[Overview]</strong> page.</li>
+                  </ol>
+                </div>`
+          },
+          {
+            cat: 'perm',
+            tag: '平台对比',
+            tagColor: 'cyan',
+            q: 'Q4. Bybit 的 API 权限设置和币安（Binance）有什么不同？BTC 和 ETH 期权怎么勾选？',
+            a: `<p>两家交易所的账户架构不同，因此 API 面板选项名称有所区别，但同样完整支持 <strong>BTC 与 ETH 期权</strong>跟单：</p>
+                <div class="space-y-2.5 mt-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p><strong>1. 期权权限选项名称不同：</strong>币安单独列出了“允许欧式期权 (Enable European Options)”；而 Bybit 的 BTC / ETH 期权统一归类在<strong>【统一交易账户】→【USDC 衍生品 / 期权交易 (USDC Derivatives / Options)】</strong>中（因为 Bybit 期权以 USDC 结算）。</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>2. 保证金共享机制不同：</strong>在 Bybit 统一交易账户（UTA）下，您只需转入 <strong>USDT 或 USDC</strong>，系统即可自动作为共享保证金支持 BTC 和 ETH 期权开仓，无需手动去币安那样的“万向划转”切换多个独立钱包。</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>3. 无单独“币对白名单”复选框：</strong>Bybit API 面板没有币安的“交易币对白名单”勾选框，只需勾选上述权限并绑定 IP <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code> 即可。</p>
+                </div>`
+          },
+          {
+            cat: 'perm',
+            tag: '有效期说明',
+            tagColor: 'cyan',
+            q: 'Q5. 为什么 Bybit 创建 API 时强烈要求绑定白名单 IP？不绑定会有什么影响？',
+            a: `<div class="space-y-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p><strong>1. 防止 90 天自动过期中断跟单：</strong>根据 Bybit 安全规则，<strong>未绑定 IP 白名单的读写权限 API 密钥将在 90 天后自动过期失效</strong>，这会导致您的跟单突然中断甚至无法自动平仓；而绑定了固定白名单 IP（<code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code>）的 API 密钥则是<strong>永久有效</strong>的。</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>2. 最高级别防盗防护：</strong>绑定 IP 后，即便密钥意外泄露，任何其他陌生 IP 也无法调用您的 API 下单。</p>
+                </div>`
+          },
+          {
+            cat: 'error',
+            tag: '报错排查',
+            tagColor: 'amber',
+            q: 'Q6. 绑定时提示“API Key 无效 / IP 不匹配 / 权限不足”怎么排查？',
+            a: `<p>请按以下 4 点逐一核对：</p>
+                <ul class="list-disc list-inside space-y-1.5 mt-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li><strong>误选了“只读 (Read-Only)”：</strong>创建 API 时必须选择<strong>【读写 (Read-Write)】</strong>，只读模式无法下单，且创建后不能直接修改为读写，需重新创建。</li>
+                  <li><strong>漏勾 USDC 衍生品 / 期权：</strong>若跟单 BTC / ETH 期权信号源，请确认已勾选<strong>【USDC 衍生品 / 期权交易】</strong>。</li>
+                  <li><strong>IP 填写有误：</strong>检查 Bybit 后台白名单框内是否准确填写了 <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code>，前后不能有多余空格。</li>
+                  <li><strong>未升级统一交易账户（UTA）：</strong>部分旧版 Bybit 账户未升级至 UTA，会导致新版 v5 接口权限校验失败，请前往资产页一键升级 UTA。</li>
+                </ul>`
+          },
+          {
+            cat: 'error',
+            tag: '报错排查',
+            tagColor: 'amber',
+            q: 'Q7. 忘记保存 Bybit 的 API Secret（私钥）怎么办？',
+            a: `<p>Bybit 出于加密安全考虑，<strong>API Secret 仅在创建完成弹出的那一刻显示一次</strong>，关闭窗口后在后台列表将无法再次查看明文。</p>
+                <p class="mt-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">如果您未及时保存，只需在 Bybit 的【API 管理】列表中点击该密钥右侧的<strong>【删除 (Delete)】</strong>，然后重新点击【创建新密钥】生成一套新的 API Key 与 Secret 并立即保存即可。</p>`
+          },
+          {
+            cat: 'security',
+            tag: '风控安全',
+            tagColor: 'cyan',
+            q: 'Q8. 如何使用 Bybit“子账户（Subaccount）”进行跟单资金物理隔离？',
+            a: `<div class="space-y-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p>Bybit 原生支持非常完善的<strong>子账户（Subaccount）</strong>功能，强烈建议您使用子账户绑定跟单，实现与主账户大额资产的 100% 物理隔离：</p>
+                  <ol class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm">
+                    <li>在 Bybit 右上角头像 → 点击<strong>【子账户 (Subaccount)】</strong> → 创建一个新的<strong>标准子账户</strong>（无需额外 KYC）。</li>
+                    <li>通过母子账户划转，仅将计划用于跟单的 <strong>USDT / USDC</strong> 划入该子账户的统一交易账户中。</li>
+                    <li>在右上角<strong>切换登录至该子账户</strong>，进入子账户的【API 管理】创建专属 API 密钥并绑定到 TGM Alliance 即可。</li>
+                  </ol>
+                </div>`
+          },
+          {
+            cat: 'security',
+            tag: '合规说明',
+            tagColor: 'cyan',
+            q: 'Q9. 所在国家/地区受 Bybit 合规限制无法交易衍生品怎么办？',
+            a: `<p>受当地金融监管法规限制，部分国家或地区（如美国、新加坡、中国大陆等受限司法管辖区）的 KYC 认证账号在 Bybit 无法使用合约或期权衍生品交易功能。若您的账号在 Bybit 受到衍生品区域限制，将无法通过 API 执行相关衍生品跟单指令。</p>`
+          }
+        ]
+      },
+
+      // ==================== BAHASA INDONESIA (ID) ====================
+      id: {
+        code: 'ID',
+        brandSub: 'PUSAT BANTUAN COPY TRADING BYBIT API',
+        themeToLight: 'Terang',
+        themeToDark: 'Gelap',
+        expandAll: 'Buka Semua',
+        collapseAll: 'Tutup Semua',
+        heroBadge: 'Akun Trading Terpadu BYBIT · Panduan Copy Trading API Otomatis',
+        heroTitle: 'Panduan Lengkap Pembuatan & Pengikatan API Bybit',
+        heroDesc: 'Panduan langkah demi langkah mulai dari upgrade ke Unified Trading Account (UTA) Bybit, membuat kunci HMAC, mengatur whitelist IP hingga menghubungkan sumber sinyal di TGM Alliance.',
+        searchPlaceholder: 'Cari kata kunci: Unified Trading, whitelist, Secret Key, hubungkan sinyal...',
+        panelTitle: 'Daftar Periksa Parameter Bybit',
+        panelSub: 'Pastikan parameter berikut sama persis di Bybit dan TGM Alliance',
+        panelBadge: 'Standar Resmi',
+        lblEnv: 'Jenis Kunci API',
+        valEnv: 'Dibuat Sistem (System-generated)',
+        lblKeyType: 'Penggunaan API',
+        valKeyType: 'Transaksi API (API Transaction)',
+        lblMarket: 'Mode Izin',
+        valMarket: 'Baca-Tulis (Read-Write)',
+        lblRole: 'Arsitektur Akun',
+        valRole: 'Unified Trading (UTA)',
+        lblIp: 'Whitelist Pembatasan Akses IP',
+        ipReq: 'Wajib Aktif',
+        copyIp: 'Salin IP',
+        copiedIp: 'Tersalin',
+        toastCopied: 'IP Whitelist (88.216.191.238) berhasil disalin!',
+        permContract: 'Kontrak (Orders / Positions)',
+        permOptions: 'Derivatif USDC / Opsi',
+        permSpot: 'Perdagangan Spot',
+        permTransfer: 'Transfer Akun',
+        permWithdraw: 'Izin Penarikan (Withdraw)',
+        mustCheck: 'Wajib Centang',
+        forbidCheck: 'Dilarang Centang',
+        tabAll: 'Semua FAQ (8)',
+        tabStart: 'Pemula',
+        tabPerm: 'Izin & Whitelist',
+        tabError: 'Solusi Error',
+        tabSecurity: 'Keamanan & Risiko',
+        noResTitle: 'Pertanyaan tidak ditemukan',
+        noResDesc: 'Coba gunakan kata kunci lain atau atur ulang pencarian',
+        noResBtn: 'Atur Ulang Pencarian',
+        footerRisk: 'Peringatan Risiko: Perdagangan aset digital dan derivatif memiliki volatilitas pasar yang tinggi. Harap kelola risiko dan pisahkan dana menggunakan sub-akun.',
+        backTop: 'Ke Atas',
+        faqs: [
+          {
+            cat: 'start',
+            tag: 'Pemula',
+            tagColor: 'emerald',
+            q: 'Q1. Persiapan apa yang diperlukan di Bybit sebelum mengikat API? (Upgrade UTA & Transfer)',
+            a: `<ol class="list-decimal list-inside space-y-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li>Masuk ke Bybit dan pastikan <strong>Verifikasi Identitas KYC</strong> selesai.</li>
+                  <li>Buka <strong class="text-emerald-600 dark:text-emerald-400">[Aset] → [Unified Trading]</strong> dan lakukan upgrade gratis ke <strong>Unified Trading Account (UTA)</strong>.</li>
+                  <li>Transfer modal <strong>USDT / USDC</strong> dari [Akun Pendanaan] ke [Unified Trading Account].</li>
+                </ol>`
+          },
+          {
+            cat: 'perm',
+            tag: 'Langkah Inti',
+            tagColor: 'emerald',
+            q: 'Q2. Cara membuat API Bybit dan mencentang izin serta whitelist IP (4 Langkah)',
+            a: `<div class="space-y-3 p-4 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p><strong>Langkah 1: Buka Manajemen API</strong><br/>Klik ikon profil kanan atas → pilih <strong>[API]</strong> → klik <strong>[Buat Kunci Baru / Create New Key]</strong>.</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>Langkah 2: Pilih Jenis Kunci & Whitelist IP</strong><br/>Pilih <strong>[System-generated API Keys]</strong> → <strong>[API Transaction]</strong> → <strong>[Read-Write]</strong> → masukkan IP Whitelist: <code class="font-mono font-bold text-emerald-600 dark:text-emerald-400">88.216.191.238</code>.</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>Langkah 3: Centang Izin Perdagangan</strong><br/>Centang <strong>Contract (Orders/Positions)</strong>, <strong>USDC Derivatives/Options</strong>, <strong>Spot Trade</strong>, dan <strong>Account Transfer</strong>. <span class="text-amber-600 dark:text-amber-400 font-semibold">JANGAN centang Withdraw!</span></p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>Langkah 4: Submit & Simpan Kunci</strong><br/>Selesaikan 2FA lalu segera salin & simpan <strong>API Key</strong> dan <strong>API Secret</strong>.</p>
+                </div>`
+          },
+          {
+            cat: 'start',
+            tag: 'Pengikatan',
+            tagColor: 'emerald',
+            q: 'Q3. Cara mengikat API Bybit ke TGM Alliance (tgmweb3.vip) dan menghubungkan sinyal',
+            a: `<p>Buka halaman pengikatan API di <strong>TGM Alliance (tgmweb3.vip)</strong>, pilih <strong>BYBIT</strong>, tempel API Key & Secret Key, pastikan IP <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code> dan klik Konfirmasi.</p>
+                <div class="mt-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/35 space-y-2">
+                  <p class="font-bold text-emerald-700 dark:text-emerald-300">⚠️ Langkah Terakhir Penting: Hubungkan Sumber Sinyal</p>
+                  <ol class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                    <li>Klik <strong>[Lihat / View]</strong> di bagian <strong>[Status Izin API]</strong> pada TGM.</li>
+                    <li>Gulir ke bawah ke <strong>[Pengaturan Copy Trading (Hubungkan Sumber Sinyal)]</strong> dan pilih sinyal strategi yang sesuai.</li>
+                    <li>Pilih mode <strong class="text-emerald-700 dark:text-emerald-400">[Auto-Scaling]</strong> lalu klik <strong>[Simpan Tautan]</strong>. Pantau posisi Anda di halaman <strong>[Ikhtisar / Overview]</strong>.</li>
+                  </ol>
+                </div>`
+          },
+          {
+            cat: 'perm',
+            tag: 'Masa Berlaku',
+            tagColor: 'cyan',
+            q: 'Q4. Mengapa wajib mengisi IP Whitelist di Bybit?',
+            a: `<p>Kunci API Read-Write Bybit tanpa IP whitelist akan <strong>kedaluwarsa otomatis setelah 90 hari</strong>. Dengan mengikat IP <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code>, API menjadi <strong>permanen</strong> dan jauh lebih aman.</p>`
+          },
+          {
+            cat: 'error',
+            tag: 'Solusi Error',
+            tagColor: 'amber',
+            q: 'Q5. Bagaimana mengatasi error "Invalid API Key / IP / Permissions"?',
+            a: `<p>Pastikan Anda memilih <strong>Read-Write</strong> (bukan Read-Only), sudah upgrade ke <strong>Unified Trading Account (UTA)</strong>, dan tidak ada spasi berlebih pada kunci API maupun IP.</p>`
+          },
+          {
+            cat: 'error',
+            tag: 'Solusi Error',
+            tagColor: 'amber',
+            q: 'Q6. Bagaimana jika lupa menyimpan API Secret Bybit?',
+            a: `<p>API Secret hanya muncul satu kali saat dibuat. Hapus kunci API lama di Bybit lalu buat kunci baru dan simpan Secret Key segera.</p>`
+          },
+          {
+            cat: 'security',
+            tag: 'Keamanan',
+            tagColor: 'cyan',
+            q: 'Q7. Bagaimana cara memisahkan modal menggunakan Sub-akun Bybit?',
+            a: `<p>Buat <strong>Standard Subaccount</strong> di menu profil Bybit, transfer modal USDT ke Unified Trading sub-akun tersebut, beralih login ke sub-akun, lalu buat API khusus sub-akun untuk diikat ke TGM Alliance.</p>`
+          },
+          {
+            cat: 'security',
+            tag: 'Kepatuhan',
+            tagColor: 'cyan',
+            q: 'Q8. Bagaimana jika negara saya dibatasi untuk derivatif Bybit?',
+            a: `<p>Akun KYC dari wilayah yang dibatasi regulasi setempat tidak dapat mengakses perdagangan derivatif atau opsi melalui API Bybit.</p>`
+          }
+        ]
+      },
+
+      // ==================== ภาษาไทย (TH) ====================
+      th: {
+        code: 'TH',
+        brandSub: 'ศูนย์ช่วยเหลือ BYBIT API COPY TRADING',
+        themeToLight: 'สว่าง',
+        themeToDark: 'มืด',
+        expandAll: 'ขยายทั้งหมด',
+        collapseAll: 'ย่อทั้งหมด',
+        heroBadge: 'บัญชีซื้อขายแบบรวม BYBIT (UTA) · คู่มือเชื่อมต่อ API อัตโนมัติ',
+        heroTitle: 'คู่มือการสร้างและเชื่อมต่อ Bybit API ฉบับสมบูรณ์',
+        heroDesc: 'ขั้นตอนอย่างละเอียดตั้งแต่การอัปเกรดบัญชี Unified Trading Account (UTA) การสร้างคีย์ HMAC การตั้งค่า IP Whitelist ไปจนถึงการเชื่อมต่อกับแพลตฟอร์ม TGM Alliance',
+        searchPlaceholder: 'ค้นหาคำสำคัญ เช่น Unified Trading, Whitelist, Secret Key, เชื่อมโยงสัญญาณ...',
+        panelTitle: 'ตารางตรวจสอบพารามิเตอร์ Bybit',
+        panelSub: 'โปรดตรวจสอบให้แน่ใจว่าค่าทั้งหมดตรงกันทั้งใน Bybit และ TGM Alliance',
+        panelBadge: 'การตั้งค่ามาตรฐาน',
+        lblEnv: 'ประเภทคีย์ API',
+        valEnv: 'สร้างโดยระบบ (System-generated)',
+        lblKeyType: 'การใช้งาน API',
+        valKeyType: 'ธุรกรรม API (API Transaction)',
+        lblMarket: 'โหมดสิทธิ์',
+        valMarket: 'อ่าน-เขียน (Read-Write)',
+        lblRole: 'ประเภทบัญชี',
+        valRole: 'Unified Trading (UTA)',
+        lblIp: 'รายการ IP ที่อนุญาต (IP Whitelist)',
+        ipReq: 'ต้องเปิดใช้งาน',
+        copyIp: 'คัดลอก IP',
+        copiedIp: 'คัดลอกแล้ว',
+        toastCopied: 'คัดลอก IP Whitelist (88.216.191.238) เรียบร้อยแล้ว!',
+        permContract: 'สัญญา (Orders / Positions)',
+        permOptions: 'อนุพันธ์ USDC / ออปชัน',
+        permSpot: 'เทรด Spot',
+        permTransfer: 'โอนย้ายบัญชี (Transfer)',
+        permWithdraw: 'สิทธิ์การถอนเงิน (Withdraw)',
+        mustCheck: 'ต้องติ๊กเลือก',
+        forbidCheck: 'ห้ามติ๊กเด็ดขาด',
+        tabAll: 'คำถามทั้งหมด (8)',
+        tabStart: 'เริ่มต้นใช้งาน',
+        tabPerm: 'สิทธิ์และ IP',
+        tabError: 'แก้ไขข้อผิดพลาด',
+        tabSecurity: 'ความปลอดภัย',
+        noResTitle: 'ไม่พบคำถามที่ตรงกับการค้นหา',
+        noResDesc: 'โปรดลองใช้คำค้นหาอื่น หรือรีเซ็ตตัวกรอง',
+        noResBtn: 'รีเซ็ตการค้นหา',
+        footerRisk: 'คำเตือนความเสี่ยง: การซื้อขายสินทรัพย์ดิจิทัลและอนุพันธ์มีความผันผวนสูง โปรดประเมินความเสี่ยงและแยกเงินทุนโดยใช้บัญชีย่อย (Subaccount)',
+        backTop: 'กลับขึ้นด้านบน',
+        faqs: [
+          {
+            cat: 'start',
+            tag: 'เริ่มต้นใช้งาน',
+            tagColor: 'emerald',
+            q: 'Q1. ต้องเตรียมตัวอย่างไรบน Bybit ก่อนทำการเชื่อมต่อ? (อัปเกรด UTA และโอนเงิน)',
+            a: `<ol class="list-decimal list-inside space-y-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li>เข้าสู่ระบบ Bybit และยืนยันตัวตน <strong>KYC</strong> ให้เรียบร้อย</li>
+                  <li>ไปที่ <strong class="text-emerald-600 dark:text-emerald-400">[สินทรัพย์] → [Unified Trading]</strong> และกดอัปเกรดเป็น <strong>Unified Trading Account (UTA)</strong></li>
+                  <li>โอนเงินทุน <strong>USDT / USDC</strong> จาก [บัญชีทุน] ไปยัง [Unified Trading Account]</li>
+                </ol>`
+          },
+          {
+            cat: 'perm',
+            tag: 'ขั้นตอนหลัก',
+            tagColor: 'emerald',
+            q: 'Q2. วิธีสร้าง Bybit API Key และติ๊กเลือกสิทธิ์พร้อม IP Whitelist (4 ขั้นตอน)',
+            a: `<div class="space-y-3 p-4 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p><strong>ขั้นตอนที่ 1: เข้าสู่หน้าจัดการ API</strong><br/>คลิกไอคอนโปรไฟล์มุมขวาบน → เลือก <strong>[API]</strong> → คลิก <strong>[สร้างคีย์ใหม่ / Create New Key]</strong></p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>ขั้นตอนที่ 2: เลือกประเภทคีย์และกรอก IP Whitelist</strong><br/>เลือก <strong>[System-generated API Keys]</strong> → <strong>[API Transaction]</strong> → <strong>[Read-Write]</strong> → กรอก IP Whitelist: <code class="font-mono font-bold text-emerald-600 dark:text-emerald-400">88.216.191.238</code></p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>ขั้นตอนที่ 3: ติ๊กเลือกสิทธิ์การเทรด</strong><br/>ติ๊กเลือก <strong>Contract (Orders/Positions)</strong>, <strong>USDC Derivatives/Options</strong>, <strong>Spot Trade</strong> และ <strong>Account Transfer</strong> <span class="text-amber-600 dark:text-amber-400 font-semibold">(ห้ามติ๊ก Withdraw เด็ดขาด!)</span></p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>ขั้นตอนที่ 4: ยืนยัน 2FA และบันทึกคีย์ทันที</strong><br/>คลิก <strong>[Submit]</strong> ยืนยัน 2FA แล้วคัดลอกเก็บ <strong>API Key</strong> และ <strong>API Secret</strong> ทันที</p>
+                </div>`
+          },
+          {
+            cat: 'start',
+            tag: 'การเชื่อมต่อ',
+            tagColor: 'emerald',
+            q: 'Q3. วิธีเชื่อมต่อ Bybit API เข้ากับ TGM Alliance (tgmweb3.vip) และเชื่อมโยงสัญญาณ',
+            a: `<p>เปิดหน้าเชื่อมต่อ API บน <strong>TGM Alliance (tgmweb3.vip)</strong> เลือก <strong>BYBIT</strong> วาง API Key และ Secret Key ตรวจสอบ IP <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code> แล้วกดยืนยัน</p>
+                <div class="mt-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/35 space-y-2">
+                  <p class="font-bold text-emerald-700 dark:text-emerald-300">⚠️ ขั้นตอนสุดท้ายที่สำคัญมาก: เชื่อมโยงแหล่งสัญญาณ</p>
+                  <ol class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                    <li>คลิกปุ่ม <strong>[ดู / View]</strong> ในช่อง <strong>[สถานะสิทธิ์ API]</strong> บนหน้า TGM</li>
+                    <li>เลื่อนลงไปที่ <strong>[การตั้งค่าการคัดลอก (เชื่อมโยงแหล่งสัญญาณ)]</strong> และเลือกแหล่งสัญญาณกลยุทธ์ที่ต้องการ</li>
+                    <li>เลือกรูปแบบ <strong class="text-emerald-700 dark:text-emerald-400">[Auto-Scaling]</strong> แล้วคลิก <strong>[บันทึกการเชื่อมโยง]</strong> จากนั้นดูออเดอร์ที่ซิงค์ได้ในหน้า <strong>[ภาพรวม / Overview]</strong></li>
+                  </ol>
+                </div>`
+          },
+          {
+            cat: 'perm',
+            tag: 'อายุการใช้งาน',
+            tagColor: 'cyan',
+            q: 'Q4. ทำไมต้องผูก IP Whitelist บน Bybit?',
+            a: `<p>คีย์ API แบบ Read-Write ของ Bybit ที่ไม่ผูก IP Whitelist <strong>จะหมดอายุอัตโนมัติใน 90 วัน</strong> การผูก IP <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code> จะทำให้คีย์ใช้งานได้<strong>ถาวร</strong>และปลอดภัยสูงสุด</p>`
+          },
+          {
+            cat: 'error',
+            tag: 'แก้ไขข้อผิดพลาด',
+            tagColor: 'amber',
+            q: 'Q5. หากขึ้นข้อความ "Invalid API Key / IP / Permissions" ต้องแก้ไขอย่างไร?',
+            a: `<p>ตรวจสอบว่าได้เลือกโหมด <strong>Read-Write</strong> (ไม่ใช่ Read-Only), อัปเกรดเป็น <strong>Unified Trading Account (UTA)</strong> แล้ว และไม่มีช่องว่างเกินในคีย์ API หรือ IP</p>`
+          },
+          {
+            cat: 'error',
+            tag: 'แก้ไขข้อผิดพลาด',
+            tagColor: 'amber',
+            q: 'Q6. ลืมบันทึก API Secret ของ Bybit ต้องทำอย่างไร?',
+            a: `<p>Bybit จะแสดง API Secret เพียงครั้งเดียวตอนสร้าง ให้ลบคีย์เดิมออกแล้วสร้างคีย์ใหม่เพื่อบันทึก Secret Key ทันที</p>`
+          },
+          {
+            cat: 'security',
+            tag: 'ความปลอดภัย',
+            tagColor: 'cyan',
+            q: 'Q7. วิธีใช้บัญชีย่อย (Subaccount) ของ Bybit เพื่อแยกเงินทุนอย่างปลอดภัย',
+            a: `<p>สร้าง <strong>Standard Subaccount</strong> ในเมนูโปรไฟล์ของ Bybit โอนเงินทุน USDT เข้ากระเป๋า Unified Trading ของบัญชีย่อย จากนั้นสลับไปใช้งานบัญชีย่อยแล้วสร้าง API เพื่อเชื่อมต่อกับ TGM Alliance</p>`
+          },
+          {
+            cat: 'security',
+            tag: 'ข้อกำหนด',
+            tagColor: 'cyan',
+            q: 'Q8. หากประเทศ/ภูมิภาคที่อยู่ถูกจำกัดการเทรดอนุพันธ์บน Bybit?',
+            a: `<p>บัญชี KYC จากประเทศที่ถูกจำกัดตามข้อกำหนดทางกฎหมายจะไม่สามารถเปิดใช้งานการซื้อขายอนุพันธ์หรือออปชันผ่าน Bybit API ได้</p>`
+          }
+        ]
+      },
+
+      // ==================== TIẾNG VIỆT (VI) ====================
+      vi: {
+        code: 'VI',
+        brandSub: 'TRUNG TÂM HỖ TRỢ BYBIT API COPY TRADING',
+        themeToLight: 'Sáng',
+        themeToDark: 'Tối',
+        expandAll: 'Mở tất cả',
+        collapseAll: 'Thu gọn',
+        heroBadge: 'Tài khoản Giao dịch Hợp nhất BYBIT (UTA) · Hướng dẫn Copy Trade API',
+        heroTitle: 'Hướng Dẫn Tạo & Liên Kết Bybit API Đầy Đủ',
+        heroDesc: 'Hướng dẫn từng bước từ nâng cấp Tài khoản Giao dịch Hợp nhất (UTA) Bybit, tạo khóa HMAC, cài đặt IP Whitelist đến liên kết nguồn tín hiệu trên TGM Alliance.',
+        searchPlaceholder: 'Tìm kiếm từ khóa: Unified Trading, whitelist, Secret Key, liên kết tín hiệu...',
+        panelTitle: 'Bảng Kiểm Tra Tham Số Bybit',
+        panelSub: 'Đảm bảo các thông số dưới đây khớp chính xác trên cả Bybit và TGM Alliance',
+        panelBadge: 'Cấu hình chuẩn',
+        lblEnv: 'Loại khóa API',
+        valEnv: 'Hệ thống tạo (System-generated)',
+        lblKeyType: 'Mục đích API',
+        valKeyType: 'Giao dịch API (API Transaction)',
+        lblMarket: 'Chế độ quyền',
+        valMarket: 'Đọc-Ghi (Read-Write)',
+        lblRole: 'Kiến trúc tài khoản',
+        valRole: 'Unified Trading (UTA)',
+        lblIp: 'Danh sách trắng IP (IP Whitelist)',
+        ipReq: 'Bắt buộc bật',
+        copyIp: 'Sao chép IP',
+        copiedIp: 'Đã chép IP',
+        toastCopied: 'Đã sao chép IP Whitelist (88.216.191.238) vào bộ nhớ tạm!',
+        permContract: 'Hợp đồng (Orders / Positions)',
+        permOptions: 'Phái sinh USDC / Quyền chọn',
+        permSpot: 'Giao dịch Spot',
+        permTransfer: 'Chuyển tiền tài khoản',
+        permWithdraw: 'Quyền rút tiền (Withdraw)',
+        mustCheck: 'Bắt buộc chọn',
+        forbidCheck: 'Cấm chọn',
+        tabAll: 'Tất cả (8)',
+        tabStart: 'Bắt đầu',
+        tabPerm: 'Quyền & IP',
+        tabError: 'Sửa lỗi',
+        tabSecurity: 'Bảo mật & Rủi ro',
+        noResTitle: 'Không tìm thấy câu hỏi phù hợp',
+        noResDesc: 'Vui lòng thử từ khóa khác hoặc đặt lại bộ lọc',
+        noResBtn: 'Đặt lại tìm kiếm',
+        footerRisk: 'Cảnh báo rủi ro: Giao dịch tài sản số và phái sinh có biến động cao. Vui lòng đánh giá rủi ro cẩn thận và tách biệt nguồn vốn bằng tài khoản phụ (Subaccount).',
+        backTop: 'Lên đầu trang',
+        faqs: [
+          {
+            cat: 'start',
+            tag: 'Bắt đầu',
+            tagColor: 'emerald',
+            q: 'Q1. Cần chuẩn bị gì trên Bybit trước khi liên kết? (Nâng cấp UTA & Chuyển vốn)',
+            a: `<ol class="list-decimal list-inside space-y-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <li>Đăng nhập Bybit và đảm bảo hoàn tất xác minh danh tính <strong>KYC</strong>.</li>
+                  <li>Vào <strong class="text-emerald-600 dark:text-emerald-400">[Tài sản] → [Unified Trading]</strong> và nâng cấp miễn phí lên <strong>Tài khoản Giao dịch Hợp nhất (UTA)</strong>.</li>
+                  <li>Chuyển vốn <strong>USDT / USDC</strong> từ [Tài khoản Funding] sang [Unified Trading Account].</li>
+                </ol>`
+          },
+          {
+            cat: 'perm',
+            tag: 'Bước cốt lõi',
+            tagColor: 'emerald',
+            q: 'Q2. Cách tạo Bybit API Key và chọn quyền cùng IP Whitelist (4 Bước)',
+            a: `<div class="space-y-3 p-4 rounded-xl bg-slate-50 dark:bg-[#0A110E] border border-slate-200/80 dark:border-tgm-border/60">
+                  <p><strong>Bước 1: Mở Quản lý API</strong><br/>Nhấn biểu tượng hồ sơ góc trên bên phải → chọn <strong>[API]</strong> → nhấn <strong>[Tạo khóa mới / Create New Key]</strong>.</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>Bước 2: Chọn loại khóa & IP Whitelist</strong><br/>Chọn <strong>[System-generated API Keys]</strong> → <strong>[API Transaction]</strong> → <strong>[Read-Write]</strong> → nhập IP Whitelist: <code class="font-mono font-bold text-emerald-600 dark:text-emerald-400">88.216.191.238</code>.</p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>Bước 3: Tích chọn quyền giao dịch</strong><br/>Chọn <strong>Contract (Orders/Positions)</strong>, <strong>USDC Derivatives/Options</strong>, <strong>Spot Trade</strong> và <strong>Account Transfer</strong>. <span class="text-amber-600 dark:text-amber-400 font-semibold">(CẤM chọn Withdraw!)</span></p>
+                  <p class="pt-2 border-t border-slate-200 dark:border-tgm-border/40"><strong>Bước 4: Xác minh 2FA & Lưu khóa ngay</strong><br/>Nhấn <strong>[Submit]</strong>, hoàn tất 2FA rồi sao chép và lưu ngay cả <strong>API Key</strong> và <strong>API Secret</strong>.</p>
+                </div>`
+          },
+          {
+            cat: 'start',
+            tag: 'Liên kết',
+            tagColor: 'emerald',
+            q: 'Q3. Cách liên kết Bybit API vào TGM Alliance (tgmweb3.vip) và liên kết nguồn tín hiệu',
+            a: `<p>Mở trang liên kết API trên <strong>TGM Alliance (tgmweb3.vip)</strong>, chọn <strong>BYBIT</strong>, dán API Key & Secret Key, kiểm tra IP <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code> và nhấn Xác nhận.</p>
+                <div class="mt-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/35 space-y-2">
+                  <p class="font-bold text-emerald-700 dark:text-emerald-300">⚠️ Bước cuối cùng cực kỳ quan trọng: Liên kết nguồn tín hiệu</p>
+                  <ol class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                    <li>Nhấn nút <strong>[Xem / View]</strong> tại mục <strong>[Trạng thái quyền API]</strong> trên TGM.</li>
+                    <li>Kéo xuống dưới đến phần <strong>[Cài đặt Copy Trade (Liên kết nguồn tín hiệu)]</strong> và chọn nguồn tín hiệu chiến lược tương ứng.</li>
+                    <li>Chọn phương thức <strong class="text-emerald-700 dark:text-emerald-400">[Auto-Scaling]</strong> rồi nhấn <strong>[Lưu liên kết]</strong>. Theo dõi vị thế đồng bộ tại trang <strong>[Tổng quan / Overview]</strong>.</li>
+                  </ol>
+                </div>`
+          },
+          {
+            cat: 'perm',
+            tag: 'Thời hạn hiệu lực',
+            tagColor: 'cyan',
+            q: 'Q4. Tại sao bắt buộc phải gắn IP Whitelist trên Bybit?',
+            a: `<p>Khóa API Read-Write của Bybit không gắn IP Whitelist <strong>sẽ tự động hết hạn sau 90 ngày</strong>. Gắn IP <code class="font-mono text-emerald-600 dark:text-emerald-400">88.216.191.238</code> giúp khóa API có hiệu lực <strong>vĩnh viễn</strong> và an toàn tối đa.</p>`
+          },
+          {
+            cat: 'error',
+            tag: 'Sửa lỗi',
+            tagColor: 'amber',
+            q: 'Q5. Cách khắc phục lỗi "Invalid API Key / IP / Permissions"?',
+            a: `<p>Đảm bảo bạn đã chọn <strong>Read-Write</strong> (không phải Read-Only), đã nâng cấp lên <strong>Unified Trading Account (UTA)</strong> và không có dấu cách thừa trong khóa API hoặc IP.</p>`
+          },
+          {
+            cat: 'error',
+            tag: 'Sửa lỗi',
+            tagColor: 'amber',
+            q: 'Q6. Quên lưu API Secret của Bybit thì làm thế nào?',
+            a: `<p>Bybit chỉ hiển thị API Secret một lần khi tạo. Hãy xóa khóa API cũ trên Bybit và tạo lại khóa mới để lưu Secret Key ngay lập tức.</p>`
+          },
+          {
+            cat: 'security',
+            tag: 'Bảo mật',
+            tagColor: 'cyan',
+            q: 'Q7. Cách dùng Tài khoản phụ (Subaccount) Bybit để tách biệt vốn an toàn',
+            a: `<p>Tạo <strong>Standard Subaccount</strong> trong menu hồ sơ Bybit, chuyển vốn USDT vào ví Unified Trading của tài khoản phụ, chuyển đăng nhập sang tài khoản phụ và tạo API riêng để liên kết với TGM Alliance.</p>`
+          },
+          {
+            cat: 'security',
+            tag: 'Tuân thủ',
+            tagColor: 'cyan',
+            q: 'Q8. Quốc gia/khu vực của tôi bị hạn chế giao dịch phái sinh trên Bybit thì sao?',
+            a: `<p>Tài khoản KYC tại các khu vực bị hạn chế theo quy định pháp lý sẽ không thể giao dịch phái sinh hoặc quyền chọn qua Bybit API.</p>`
+          }
+        ]
+      }
+    };
+
+    // ==========================================
+    // 2. 状态管理与初始化
+    // ==========================================
+    let currentLang = 'zh';
+    try {
+      currentLang = localStorage.getItem('tgm_bybit_faq_lang') || 'zh';
+    } catch (e) {}
+    if (!I18N[currentLang]) currentLang = 'zh';
+
+    let currentCategory = 'all';
+    let allExpanded = false;
+    let openStates = [true, true, false, false, false, false, false, false, false];
+
+    function initTheme() {
+      let savedTheme = 'dark';
+      try {
+        savedTheme = localStorage.getItem('tgm_bybit_faq_theme') || 'dark';
+      } catch (e) {}
+      const htmlEl = document.documentElement;
+      if (savedTheme === 'light') {
+        htmlEl.classList.remove('dark');
+      } else {
+        htmlEl.classList.add('dark');
+      }
+      updateThemeButtonLabel();
+    }
+
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const isDark = htmlEl.classList.toggle('dark');
+      try {
+        localStorage.setItem('tgm_bybit_faq_theme', isDark ? 'dark' : 'light');
+      } catch (e) {}
+      updateThemeButtonLabel();
+    }
+
+    function updateThemeButtonLabel() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const t = I18N[currentLang];
+      const lbl = document.getElementById('ui-theme-label');
+      if (lbl) {
+        lbl.textContent = isDark ? t.themeToLight : t.themeToDark;
+      }
+    }
+
+    function toggleLangMenu() {
+      const menu = document.getElementById('lang-menu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('lang-dropdown-wrapper');
+      const menu = document.getElementById('lang-menu');
+      if (wrapper && menu && !wrapper.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    function setLanguage(lang) {
+      if (!I18N[lang]) return;
+      currentLang = lang;
+      try {
+        localStorage.setItem('tgm_bybit_faq_lang', lang);
+      } catch (e) {}
+      document.documentElement.lang = lang;
+
+      const menu = document.getElementById('lang-menu');
+      if (menu) menu.classList.add('hidden');
+
+      const t = I18N[lang];
+      const langLbl = document.getElementById('current-lang-label');
+      if (langLbl) langLbl.textContent = t.code;
+
+      document.querySelectorAll('.lang-option').forEach(btn => {
+        const spanCode = btn.querySelector('span:last-child');
+        if (!spanCode) return;
+        if (btn.dataset.lang === lang) {
+          btn.classList.add('bg-emerald-500/10', 'font-semibold');
+          spanCode.className = 'font-mono text-[11px] text-emerald-600 dark:text-emerald-400 font-bold';
+        } else {
+          btn.classList.remove('bg-emerald-500/10', 'font-semibold');
+          spanCode.className = 'font-mono text-[11px] text-slate-400';
+        }
+      });
+
+      const setText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+
+      setText('ui-brand-sub', t.brandSub);
+      setText('ui-toggle-all', allExpanded ? t.collapseAll : t.expandAll);
+      setText('ui-hero-badge', t.heroBadge);
+      setText('ui-hero-title', t.heroTitle);
+      setText('ui-hero-desc', t.heroDesc);
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+
+      setText('ui-panel-title', t.panelTitle);
+      setText('ui-panel-sub', t.panelSub);
+      const badgeSpan = document.querySelector('#ui-panel-badge span');
+      if (badgeSpan) badgeSpan.textContent = t.panelBadge;
+
+      setText('ui-lbl-env', t.lblEnv);
+      setText('ui-val-env', t.valEnv);
+      setText('ui-lbl-keytype', t.lblKeyType);
+      setText('ui-val-keytype', t.valKeyType);
+      setText('ui-lbl-market', t.lblMarket);
+      setText('ui-val-market', t.valMarket);
+      setText('ui-lbl-role', t.lblRole);
+      setText('ui-val-role', t.valRole);
+
+      setText('ui-lbl-ip', t.lblIp);
+      setText('ui-ip-req', t.ipReq);
+      setText('ui-copy-ip-text', t.copyIp);
+
+      setText('ui-perm-contract', t.permContract);
+      setText('ui-perm-options', t.permOptions);
+      setText('ui-perm-spot', t.permSpot);
+      setText('ui-perm-transfer', t.permTransfer);
+      setText('ui-perm-withdraw', t.permWithdraw);
+
+      document.querySelectorAll('.ui-must-check span').forEach(el => el.textContent = t.mustCheck);
+      const forbidSpan = document.querySelector('#ui-forbid-check span');
+      if (forbidSpan) forbidSpan.textContent = t.forbidCheck;
+
+      setText('tab-all', t.tabAll);
+      setText('tab-start', t.tabStart);
+      setText('tab-perm', t.tabPerm);
+      setText('tab-error', t.tabError);
+      setText('tab-security', t.tabSecurity);
+
+      setText('ui-nores-title', t.noResTitle);
+      setText('ui-nores-desc', t.noResDesc);
+      setText('ui-nores-btn', t.noResBtn);
+
+      setText('ui-footer-risk', t.footerRisk);
+      setText('ui-back-top', t.backTop);
+
+      updateThemeButtonLabel();
+      renderFaqList();
+      filterFaq();
+    }
+
+    function renderFaqList() {
+      const container = document.getElementById('faq-list');
+      if (!container) return;
+      const faqs = I18N[currentLang].faqs;
+
+      const badgeStyles = {
+        emerald: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/25',
+        amber: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/25',
+        cyan: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border-cyan-500/25'
+      };
+
+      container.innerHTML = faqs.map((item, idx) => {
+        const isOpen = openStates[idx] ? 'open' : '';
+        const badgeClass = badgeStyles[item.tagColor] || badgeStyles.emerald;
+
+        return `
+          <article class="faq-item ${isOpen} bg-white dark:bg-tgm-card border border-slate-200 dark:border-tgm-border hover:border-emerald-500/50 rounded-2xl shadow-sm dark:shadow-none transition" data-category="${item.cat}" data-index="${idx}">
+            <button onclick="toggleFaq(${idx})" type="button" class="w-full text-left px-5 py-4 sm:px-6 sm:py-5 flex items-start sm:items-center justify-between gap-4">
+              <div class="flex items-start sm:items-center gap-3">
+                <span class="shrink-0 mt-0.5 sm:mt-0 px-2.5 py-1 rounded-lg text-xs font-semibold border ${badgeClass}">
+                  ${item.tag}
+                </span>
+                <h3 class="text-sm sm:text-base font-semibold text-slate-900 dark:text-white leading-snug">
+                  ${item.q}
+                </h3>
+              </div>
+              <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0 mt-0.5 sm:mt-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="faq-content">
+              <div class="faq-inner">
+                <div class="px-5 pb-5 sm:px-6 sm:pb-6 pt-3 border-t border-slate-100 dark:border-tgm-border/50 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  ${item.a}
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function toggleFaq(index) {
+      openStates[index] = !openStates[index];
+      const itemEl = document.querySelector(`.faq-item[data-index="${index}"]`);
+      if (itemEl) {
+        itemEl.classList.toggle('open', openStates[index]);
+      }
+    }
+
+    function toggleAllFaq() {
+      allExpanded = !allExpanded;
+      openStates = openStates.map(() => allExpanded);
+      document.querySelectorAll('.faq-item').forEach(el => {
+        el.classList.toggle('open', allExpanded);
+      });
+      const t = I18N[currentLang];
+      const lbl = document.getElementById('ui-toggle-all');
+      if (lbl) lbl.textContent = allExpanded ? t.collapseAll : t.expandAll;
+    }
+
+    function setCategory(category) {
+      currentCategory = category;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.dataset.category === category) {
+          btn.className = 'tab-btn active shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-emerald-600 dark:bg-emerald-500 text-white dark:text-[#051B14] shadow-sm';
+        } else {
+          btn.className = 'tab-btn shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-white dark:bg-tgm-card text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-tgm-border hover:border-emerald-500/50';
+        }
+      });
+      filterFaq();
+    }
+
+    function filterFaq() {
+      const searchInput = document.getElementById('search-input');
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      const clearBtn = document.getElementById('clear-search');
+      const items = document.querySelectorAll('.faq-item');
+      let visibleCount = 0;
+
+      if (clearBtn) clearBtn.classList.toggle('hidden', query.length === 0);
+
+      items.forEach(item => {
+        const idx = Number(item.dataset.index);
+        const cat = item.dataset.category;
+        const text = item.innerText.toLowerCase();
+
+        const matchCat = (currentCategory === 'all' || cat === currentCategory);
+        const matchQuery = (query === '' || text.includes(query));
+
+        if (matchCat && matchQuery) {
+          item.classList.remove('hidden');
+          if (query.length > 0) {
+            openStates[idx] = true;
+            item.classList.add('open');
+          }
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      const noResults = document.getElementById('no-results');
+      if (noResults) noResults.classList.toggle('hidden', visibleCount > 0);
+    }
+
+    function clearSearch() {
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.value = '';
+      setCategory('all');
+    }
+
+    function copyIpAddress() {
+      const ip = '88.216.191.238';
+      const t = I18N[currentLang];
+      const textArea = document.createElement('textarea');
+      textArea.value = ip;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(t.toastCopied);
+        const btnText = document.getElementById('ui-copy-ip-text');
+        if (btnText) {
+          btnText.textContent = t.copiedIp;
+          setTimeout(() => {
+            btnText.textContent = I18N[currentLang].copyIp;
+          }, 2200);
+        }
+      } catch (err) {
+        showToast(ip);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-message');
+      if (!toast || !msgEl) return;
+      msgEl.textContent = msg;
+      toast.classList.remove('translate-y-[-16px]', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-[-16px]', 'opacity-0');
+      }, 2800);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      setLanguage(currentLang);
+    });
+  </script>
+</body>
+</html>
